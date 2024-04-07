@@ -1,15 +1,151 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>Foodie Finds</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foodie Finds</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f2f2f2;
+    }
+    header {
+      background-image: url('https://as2.ftcdn.net/v2/jpg/02/44/71/07/1000_F_244710705_kJbRGNfdwXq4zfikaaXE77iQCAHsQjt0.jpg');
+        background-color: #DC143C;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+    }
+  table {
+      border-collapse: collapse;
+      width: 100%;
+  }
+  th, td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+  }
+  th {
+      background-color: #f2f2f2;
+  }
+    footer {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 10px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+</style>
 </head>
-
 <body>
-  <script src="script.js"></script>
-</body>
 
+<header>
+  <img src="https://static.vecteezy.com/system/resources/thumbnails/002/621/029/small/chef-recipe-book-kitchen-utensil-line-style-icon-free-vector.jpg" class="logo">
+    <h1>Foodie Finds</h1>
+</header>
+
+  <h2>Foodie Finds</h2>
+  <table id="categoriesTable">
+      <thead>
+          <tr>
+              <th>Category ID</th>
+              <th>Name</th>
+              <th>Image</th>
+              <th>Description</th>
+          </tr>
+      </thead>
+      <tbody id="categoriesBody"></tbody>
+  </table>
+
+  <h2>Items for Category</h2>
+  <select id="categorySelect"></select>
+  <button onclick="getItems()">Show Items</button>
+  <table id="itemsTable">
+      <thead>
+          <tr>
+              <th>Meal ID</th>
+              <th>Name</th>
+              <th>Image</th>
+          </tr>
+      </thead>
+      <tbody id="itemsBody"></tbody>
+  </table>
+
+  <h2>Full Meal Details</h2>
+  <input type="text" id="mealIdInput" placeholder="Enter Meal ID">
+  <button onclick="getMealDetails()">Show Details</button>
+  <div id="mealDetails"></div>
+
+  <script>
+      
+      fetch('https://www.themealdb.com/api/json/v1/1/categories.php')
+      .then(response => response.json())
+      .then(data => {
+          const categoriesBody = document.getElementById('categoriesBody');
+          data.categories.forEach(category => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                  <td>${category.idCategory}</td>
+                  <td>${category.strCategory}</td>
+                  <td><img src="${category.strCategoryThumb}" alt="${category.strCategory}" width="100"></td>
+                  <td>${category.strCategoryDescription}</td>
+              `;
+              categoriesBody.appendChild(row);
+          });
+      });
+
+      
+      function getItems() {
+          const categoryId = document.getElementById('categorySelect').value;
+          fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${categoryId}`)
+          .then(response => response.json())
+          .then(data => {
+              const itemsBody = document.getElementById('itemsBody');
+              itemsBody.innerHTML = '';
+              data.meals.forEach(item => {
+                  const row = document.createElement('tr');
+                  row.innerHTML = `
+                      <td>${item.idMeal}</td>
+                      <td>${item.strMeal}</td>
+                      <td><img src="${item.strMealThumb}" alt="${item.strMeal}" width="100"></td>
+                  `;
+                  itemsBody.appendChild(row);
+              });
+          });
+      }
+
+     
+      function getMealDetails() {
+          const mealId = document.getElementById('mealIdInput').value;
+          fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`)
+          .then(response => response.json())
+          .then(data => {
+              const mealDetails = document.getElementById('mealDetails');
+              const meal = data.meals[0];
+              mealDetails.innerHTML = `
+                  <p><strong>ID:</strong> ${meal.idMeal}</p>
+                  <p><strong>Name:</strong> ${meal.strMeal}</p>
+                  <p><strong>Image:</strong> <img src="${meal.strMealThumb}" alt="${meal.strMeal}" width="100"></p>
+                  <p><strong>Category:</strong> ${meal.strCategory}</p>
+                  <p><strong>Instructions:</strong> ${meal.strInstructions}</p>
+                  <!-- Add more details as needed -->
+              `;
+          })
+          .catch(error => {
+              const mealDetails = document.getElementById('mealDetails');
+              mealDetails.innerHTML = `<p>Error: Meal not found</p>`;
+          });
+      }
+  </script>
+  </body>
+
+<footer>
+    &copy; 2024 Professional Webpage
+</footer>
+
+</body>
 </html>
