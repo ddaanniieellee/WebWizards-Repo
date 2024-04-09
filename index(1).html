@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foodie Finds</title>
+  <style>
+    #logo {
+      padding-right: 50%;
+    }
+
+    .nav-bar {
+      background-color: white;
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-bar li {
+
+      display: inline;
+
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header img {}
+
+    nav {
+      display: flex;
+      justify-content: right;
+      margin-bottom: 20px;
+
+    }
+
+    nav a {
+      text-decoration: none;
+      color: black;
+      padding: 10px 20px;
+    }
+
+    nav a:hover {
+      background-color: #555;
+    }
+
+    section {
+      padding: 20px;
+      margin: 20px;
+      border: 1px solid #ddd;
+    }
+
+    .search-section {
+      background-image: url('https://as2.ftcdn.net/v2/jpg/02/44/71/07/1000_F_244710705_kJbRGNfdwXq4zfikaaXE77iQCAHsQjt0.jpg');
+      color: white;
+      text-align: center;
+    }
+
+    input[type="text"] {
+      padding: 8px;
+      width: 300px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    input[type="submit"] {
+      padding: 8px 20px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+
+
+
+
+    <nav>
+      <ul class="nav-bar">
+        <li id="logo"><img src="https://i.stack.imgur.com/5nE4S.jpg" width="150" /></li>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#contact">Contact Us</a></li>
+      </ul>
+    </nav>
+  </header>
+
+
+  <section class="search-section">
+    <h2>Search Section</h2>
+    <form action="#">
+      <input type="text" placeholder="Search...">
+      <input type="submit" value="Search">
+    </form>
+  </section>
+
+  <section id="home">
+    <h2>Catalog</h2>
+    <a onClick="getItems('Seafood');" href="#recipes">Seafood</a>
+    <table id="categoriesTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Image</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody id="categoriesBody"></tbody>
+    </table>
+  </section>
+
+  <section id="recipes">
+    <h2>Recipes</h2>
+    <p>This section displays the recipes for the selected category.</p>
+    <table id="itemsTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Image</th>
+        </tr>
+      </thead>
+      <tbody id="itemsBody">
+      </tbody>
+    </table>
+  </section>
+
+  <section id="about">
+    <h2>About Section</h2>
+    <p>This is the about section of my webpage.</p>
+  </section>
+  <section id="contact">
+    <h2>Contact Section</h2>
+    <p>This is the contact section of my webpage.</p>
+  </section>
+
+
+
+  <script>
+
+    function displayCategories(categories) {
+      let categoriesBody = document.querySelector('#categoriesBody');
+      let html = '';
+      for (let category of categories) {
+        html += `<tr>
+              <td>${category.idCategory}</td>
+              <td><a onclick = "getItems(${category.strCategory});" href="#recipes">${category.strCategory}</a><td>
+              <td><img src="${category.strCategoryThumb}" alt="${category.strCategory}" width="100"></td>
+              <td>${category.strCategoryDescription}</td>
+              </tr>`;
+      }
+      categoriesBody.innerHTML = html;
+    }
+
+    async function getCategories() {
+      const response = await fetch('https://www.themealdb.com/api/json/v1/1/categories.php');
+      const data = await response.json();
+      displayCategories(data.categories);
+    }
+
+    getCategories();
+
+    function displayItems(items) {
+      let itemsBody = document.querySelector('#itemsBody');
+      let html = '';
+      for (let i of items) {
+        html += `<tr>
+                <td>${i.idMeal}</td>
+                <td>${i.strMeal}</td>
+                <td><img src="${i.strMealThumb}" alt="${i.strMeal}" width="100"></td>
+              </tr>`;
+      }
+      itemsBody.innerHTML = html;
+    }
+
+    async function getItems(category) {
+      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
+      const data = await response.json();
+      displayItems(data.meals);
+    }
+
+    function getMealDetails() {
+        const mealId = document.getElementById('mealIdInput').value;
+        fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`)
+        .then(response => response.json())
+        .then(data => {
+            const mealDetails = document.getElementById('mealDetails');
+            const meal = data.meals[0];
+            mealDetails.innerHTML = `
+                <p><strong>ID:</strong> ${meal.idMeal}</p>
+                <p><strong>Name:</strong> ${meal.strMeal}</p>
+                <p><strong>Image:</strong> <img src="${meal.strMealThumb}" alt="${meal.strMeal}" width="100"></p>
+                <p><strong>Category:</strong> ${meal.strCategory}</p>
+                <p><strong>Instructions:</strong> ${meal.strInstructions}</p>
+                <!-- Add more details as needed -->
+            `;
+        })
+        .catch(error => {
+            const mealDetails = document.getElementById('mealDetails');
+            mealDetails.innerHTML = `<p>Error: Meal not found</p>`;
+        });
+    }
+
+  </script>
+</body>
+
+<footer>
+  &copy; 2024 Professional Webpage
+</footer>
+
+</html>
